@@ -49,6 +49,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="ConfigrationService.cs" />
     <Compile Include="DataAdapters\DataAdapterFactory.cs" />
+    <Compile Include="DataAdapters\IApiContainerAdpt.cs" />
     <Compile Include="DataAdapters\IApiDataAdapter.cs" />
     <Compile Include="DataAdapters\IBasicDataAdapter.cs" />
     <Compile Include="DataAdapters\IConfigrationDataAdapter.cs" />

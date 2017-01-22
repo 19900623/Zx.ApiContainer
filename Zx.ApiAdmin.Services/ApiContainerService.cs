@@ -29,6 +29,12 @@ namespace Zx.ApiAdmin.Services
             return DataAdapterFactory.GetApiDataAdapter();
         }
 
+        private IApiDataAdapter GetAdapterSimpleData()
+        {
+            //尝试用mef
+            return DataAdapterFactory.GetApiDataAdapter();
+        }
+
         /// <summary>
         /// 获取api现有站点
         /// </summary>
