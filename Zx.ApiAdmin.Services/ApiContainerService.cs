@@ -35,24 +35,8 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public List<ApiContainerSiteConfig> GetApiContainerSites()
         {
-            var adpt = GetAdapter();
-            var list = adpt.Query<ApiContainerSiteConfig>(where: null, paramDic: null);
+            var list = GetAllSite();
             return list;
-        }
-
-        /// <summary>
-        /// 获取api站点
-        /// </summary>
-        /// <returns></returns>
-        private ApiContainerSiteConfig GetApiContainerSiteById(int siteId)
-        {
-            const string @where = "ID=@siteId";
-            var paramDic = new Dictionary<string, object> { { "@siteId", siteId } };
-            var adpt = GetAdapter();
-            var list = adpt.Query<ApiContainerSiteConfig>(where, paramDic);
-            if (list == null) return null;
-            var site = list.FirstOrDefault();
-            return site;
         }
 
         /// <summary>
@@ -62,9 +46,7 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public ApiContainerUploadRecord GetApiContainerLastUploadRecord(int siteId)
         {
-            var list = GetAdapter().Query<ApiContainerUploadRecord>("SiteId=@siteId", "AddTime desc",
-                new Dictionary<string, object> { { "@siteId", siteId } }, null);
-            if (list == null) return null;
+            var list = GetUploadRecordsBySiteId(siteId);
             var record = list.FirstOrDefault();
             return record;
         }
@@ -76,10 +58,7 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public List<ApiContainerRouteMapping> GetApiContainerRouteMappingBySite(int siteId)
         {
-            const string @where = "SiteId=@siteId";
-            var paramDic = new Dictionary<string, object> { { "@siteId", siteId } };
-            var adpt = GetAdapter();
-            var list = adpt.Query<ApiContainerRouteMapping>(where, paramDic);
+            var list = GetRouteMappingsBySiteId(siteId);
             return list;
         }
 
@@ -90,9 +69,8 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public List<ApiContainerUploadRecord> GetApiContainerUploadRecord(int siteId)
         {
-            var list = GetAdapter().Query<ApiContainerUploadRecord>("SiteId=@siteId", "AddTime desc",
-               new Dictionary<string, object> { { "@siteId", siteId } }, null);
-            return list ?? new List<ApiContainerUploadRecord>();
+            var list = GetUploadRecordsBySiteId(siteId);
+            return list;
         }
 
         /// <summary>
@@ -102,7 +80,7 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public ApiContainerUploadRecord GetApiContainerUploadRecordById(int id)
         {
-            var record = GetAdapter().Query<ApiContainerUploadRecord>(id);
+            var record = GetUploadRecordById(id);
             return record;
         }
 
@@ -113,7 +91,7 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         private List<string> GetApiLibPath(int siteId)
         {
-            var site = GetApiContainerSiteById(siteId);
+            var site = GetSiteById(siteId);
             if(site==null)return new List<string>();
             var strMachines = site.Machine ?? string.Empty;
             var liTarget =
@@ -131,10 +109,8 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         private IEnumerable<ApiContainerRouteMappingHistory> GetApiContainerRouteMappingHistoryBySiteAndUploadRecord(int siteId, int recordId)
         {
-            var list = GetAdapter()
-                .Query<ApiContainerRouteMappingHistory>("SiteId=@siteId and UploadRecordId=@recordId",
-                    new Dictionary<string, object> { { "@siteId", siteId }, { "@recordId", recordId } });
-            return list ?? new List<ApiContainerRouteMappingHistory>();
+            var list = GetSiteRouteMappingHistoryByRecordId(siteId, recordId);
+            return list;
         }
 
         /// <summary>
@@ -145,10 +121,9 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         private bool SyncApiContainerRouteMappings(int siteId, List<ApiContainerRouteMapping> mappings)
         {
-            var adpt = GetAdapter();
             try
             {
-                adpt.DeleteApiContainerRouteMapping(siteId);
+                DeleteSiteRouteMapping(siteId);
             }
             catch (Exception e)
             {
@@ -157,8 +132,8 @@ namespace Zx.ApiAdmin.Services
             var res = true;
             mappings.ForEach(m =>
             {
-                var itemRes = adpt.InsertToDB(ref m);
-                res = res && itemRes;
+                var dbm = InsertSiteRouteMapping(m);
+                res = res && dbm != null;
             });
             return res;
         }
@@ -170,11 +145,10 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         private int RecordUploadApiContainer(ApiContainerUploadRecord record)
         {
-            var adpt = GetAdapter();
-            if (!adpt.Insert(ref record))
+            var dbRecord = InsertUploadRecord(record);
+            if (dbRecord == null)
                 throw new Exception("RecordUploadApiContainer失败");
-            var res = record.ID;
-            return res;
+            return dbRecord.ID;
         }
 
         /// <summary>
@@ -385,12 +359,11 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         private bool SaveApiContainerRouteMappingHistory(List<ApiContainerRouteMappingHistory> mappingsHistory)
         {
-            var adpt = GetAdapter();
             var res = true;
             mappingsHistory.ForEach(mh =>
             {
-                var itemRes = adpt.InsertToDB(ref mh);
-                res = res && itemRes;
+                var mhdb = InsertRouteMappingHistory(mh);
+                res = res && mhdb != null;
             });
             return res;
         }
@@ -402,7 +375,7 @@ namespace Zx.ApiAdmin.Services
         /// <returns></returns>
         public bool RecycleAppPool(int siteId)
         {         
-            var site = GetApiContainerSiteById(siteId);
+            var site = GetSiteById(siteId);
             if (site == null) return false;
             if (string.IsNullOrEmpty(site.ApiDomain)) return false;
             var appPool = site.ApiDomain.Replace("http://", "");
@@ -714,9 +687,97 @@ namespace Zx.ApiAdmin.Services
         }
 
         #endregion
+
+        #region repos
+
+        public List<ApiContainerSiteConfig> GetAllSite()
+        {
+            var adpt = GetAdapter();
+            var list = adpt.Query<ApiContainerSiteConfig>(where: null, paramDic: null);
+            return list;
+        }
+
+        public ApiContainerSiteConfig GetSiteById(int id)
+        {
+            const string @where = "ID=@siteId";
+            var paramDic = new Dictionary<string, object> { { "@siteId", id } };
+            var adpt = GetAdapter();
+            var list = adpt.Query<ApiContainerSiteConfig>(where, paramDic);
+            if (list == null) return null;
+            var site = list.FirstOrDefault();
+            return site;
+        }
+
+        public List<ApiContainerUploadRecord> GetUploadRecordsBySiteId(int siteId)//用simpledata可以生成带top 1的sql
+        {
+            var list = GetAdapter().Query<ApiContainerUploadRecord>("SiteId=@siteId", "AddTime desc",
+                new Dictionary<string, object> { { "@siteId", siteId } }, null);
+            if (list == null) return new List<ApiContainerUploadRecord>();
+            return list;
+        }
+
+        public ApiContainerUploadRecord GetUploadRecordById(int id)
+        {
+            var record = GetAdapter().Query<ApiContainerUploadRecord>(id);
+            return record;
+        }
+
+        public ApiContainerUploadRecord InsertUploadRecord(ApiContainerUploadRecord record)
+        {
+            var r = record;
+            var adpt = GetAdapter();
+            var itemRes = adpt.Insert(ref r);
+            if (!itemRes) return null;
+            return r;
+        }
+
+        public List<ApiContainerRouteMapping> GetRouteMappingsBySiteId(int siteId)
+        {
+            const string @where = "SiteId=@siteId";
+            var paramDic = new Dictionary<string, object> { { "@siteId", siteId } };
+            var adpt = GetAdapter();
+            var list = adpt.Query<ApiContainerRouteMapping>(where, paramDic);
+            return list;
+        }
+
+        public void DeleteSiteRouteMapping(int siteId)
+        {
+            var adpt = GetAdapter();
+            adpt.DeleteApiContainerRouteMapping(siteId);            
+        }
+
+        public ApiContainerRouteMapping InsertSiteRouteMapping(ApiContainerRouteMapping mapping)
+        {
+            var m = mapping;
+            var adpt = GetAdapter();
+            var itemRes = adpt.InsertToDB(ref m);
+            if (!itemRes) return null;
+            return m;
+        }
+
+        public List<ApiContainerRouteMappingHistory> GetSiteRouteMappingHistoryByRecordId(int siteId,
+            int recordId)
+        {
+            var list = GetAdapter()
+                .Query<ApiContainerRouteMappingHistory>("SiteId=@siteId and UploadRecordId=@recordId",
+                    new Dictionary<string, object> { { "@siteId", siteId }, { "@recordId", recordId } });
+            if (list == null) return new List<ApiContainerRouteMappingHistory>();
+            return list;
+        }
+
+        public ApiContainerRouteMappingHistory InsertRouteMappingHistory(ApiContainerRouteMappingHistory history)
+        {
+            var h = history;
+            var adpt = GetAdapter();
+            var itemRes = adpt.InsertToDB(ref h);
+            if (!itemRes) return null;
+            return h;
+        }
+
+        #endregion
     }
 
-    
+
 
     #region RemoteLoader
 
@@ -873,4 +934,5 @@ namespace Zx.ApiAdmin.Services
         public List<Tuple<string, string, string>> ParmTypes { get; set; }
     }
     #endregion
+   
 }
