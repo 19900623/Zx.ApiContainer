@@ -19,14 +19,21 @@ namespace Zx.ApiAdmin.Services.DataAdapters
 
         ApiContainerUploadRecord InsertUploadRecord(ApiContainerUploadRecord record);
 
+        List<ApiContainerUploadRecord> InsertUploadRecords(IEnumerable<ApiContainerUploadRecord> records);
+
         List<ApiContainerRouteMapping> GetRouteMappingsBySiteId(int siteId);
 
         void DeleteSiteRouteMapping(int siteId);
 
         ApiContainerRouteMapping InsertSiteRouteMapping(ApiContainerRouteMapping mapping);
 
+        List<ApiContainerRouteMapping> InsertSiteRouteMappings(IEnumerable<ApiContainerRouteMapping> mappings);
+
         List<ApiContainerRouteMappingHistory> GetSiteRouteMappingHistoryByRecordId(int siteId, int recordId);
 
         ApiContainerRouteMappingHistory InsertRouteMappingHistory(ApiContainerRouteMappingHistory history);
+
+        List<ApiContainerRouteMappingHistory> InsertRouteMappingHistories(
+            IEnumerable<ApiContainerRouteMappingHistory> histories);
     }
 }

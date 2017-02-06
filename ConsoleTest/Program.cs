@@ -10,7 +10,7 @@ namespace ConsoleTest
     {
         static void Main(string[] args)
         {
-            ReposSimpleDataTest.Test1();
+            ReposSimpleDataTest.Test4();
         }
     }
 }

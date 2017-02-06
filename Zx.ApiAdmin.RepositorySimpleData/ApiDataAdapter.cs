@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Simple.Data;
 using Zx.ApiAdmin.Entity.Admin;
 using Zx.ApiAdmin.Services.DataAdapters;
+using System.Collections;
 
 namespace Zx.ApiAdmin.RepositorySimpleData
 {
@@ -49,7 +50,15 @@ namespace Zx.ApiAdmin.RepositorySimpleData
 
         public ApiContainerUploadRecord InsertUploadRecord(ApiContainerUploadRecord record)
         {
-            throw new NotImplementedException();
+            ApiContainerUploadRecord insertedRecord = Db.ApiContainerUploadRecord.Insert(record);
+            return insertedRecord;
+        }
+
+        public List<ApiContainerUploadRecord> InsertUploadRecords(IEnumerable<ApiContainerUploadRecord> records)
+        {
+            List<ApiContainerUploadRecord> inserted =
+                Db.ApiContainerUploadRecord.Insert(records.ToArray()).ToList<ApiContainerUploadRecord>();
+            return inserted;
         }
 
         public List<ApiContainerRouteMapping> GetRouteMappingsBySiteId(int siteId)
@@ -60,12 +69,20 @@ namespace Zx.ApiAdmin.RepositorySimpleData
 
         public void DeleteSiteRouteMapping(int siteId)
         {
-            throw new NotImplementedException();
+            Db.ApiContainerRouteMapping.DeleteAll(Db.ApiContainerRouteMapping.SiteId == siteId);
         }
 
         public ApiContainerRouteMapping InsertSiteRouteMapping(ApiContainerRouteMapping mapping)
         {
-            throw new NotImplementedException();
+            ApiContainerRouteMapping inserted = Db.ApiContainerRouteMapping.Insert(mapping);
+            return inserted;
+        }
+
+        public List<ApiContainerRouteMapping> InsertSiteRouteMappings(IEnumerable<ApiContainerRouteMapping> mappings)
+        {
+            List<ApiContainerRouteMapping> inserted =
+                Db.ApiContainerRouteMapping.Insert(mappings.ToArray()).ToList<ApiContainerRouteMapping>();
+            return inserted;
         }
 
         public List<ApiContainerRouteMappingHistory> GetSiteRouteMappingHistoryByRecordId(int siteId, int recordId)
@@ -79,7 +96,15 @@ namespace Zx.ApiAdmin.RepositorySimpleData
 
         public ApiContainerRouteMappingHistory InsertRouteMappingHistory(ApiContainerRouteMappingHistory history)
         {
-            throw new NotImplementedException();
+            ApiContainerRouteMappingHistory inserted = Db.ApiContainerRouteMappingHistory.Insert(history);
+            return inserted;
+        }
+
+        public List<ApiContainerRouteMappingHistory> InsertRouteMappingHistories(IEnumerable<ApiContainerRouteMappingHistory> histories)
+        {
+            List<ApiContainerRouteMappingHistory> inserted =
+                Db.ApiContainerRouteMappingHistory.Insert(histories.ToArray()).ToList<ApiContainerRouteMappingHistory>();
+            return inserted;
         }
     }
 }
