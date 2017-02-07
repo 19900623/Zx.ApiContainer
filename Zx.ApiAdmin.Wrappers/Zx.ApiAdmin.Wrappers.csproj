@@ -76,6 +76,7 @@
     <Compile Include="LogHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceFactory.cs" />
+    <Compile Include="ServiceFactoryTinyIoC.cs" />
     <Compile Include="Utils\HashAlgorithm.cs" />
     <Compile Include="Utils\KetamaNodeLocator.cs.cs" />
   </ItemGroup>

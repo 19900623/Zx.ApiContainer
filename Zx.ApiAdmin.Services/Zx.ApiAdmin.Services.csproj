@@ -46,9 +46,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiContainerService.cs" />
+    <Compile Include="ApiContainerServiceSimpleData.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="ConfigrationService.cs" />
     <Compile Include="DataAdapters\DataAdapterFactory.cs" />
+    <Compile Include="DataAdapters\DataAdapterFactorySimpleData.cs" />
+    <Compile Include="DataAdapters\DataAdapterFactorySimpleDataTinyIoC.cs" />
     <Compile Include="DataAdapters\IApiContainerAdpt.cs" />
     <Compile Include="DataAdapters\IApiDataAdapter.cs" />
     <Compile Include="DataAdapters\IBasicDataAdapter.cs" />
