@@ -10,7 +10,9 @@ namespace ConsoleTest
     {
         static void Main(string[] args)
         {
-            ReposSimpleDataTest.Test4();
+            //ReposSimpleDataTest.Test4();
+            var test = new CsvTest();
+            test.Test();
         }
     }
 }
